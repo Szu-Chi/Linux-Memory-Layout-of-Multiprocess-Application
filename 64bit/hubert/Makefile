@@ -1,0 +1,1 @@
+obj-y := hubert.o
