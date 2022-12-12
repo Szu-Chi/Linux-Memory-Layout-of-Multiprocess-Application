@@ -10,10 +10,10 @@
 #define MALLOC_SIZE 32
 #define THREAD_NUM 3
 
-#define __NR_gettid 186
-#define __NR_hubert 449
-#define __NR_getms 450
-#define __NR_get_phy_addr 451
+#define __NR_gettid 224
+#define __NR_hubert 385
+#define __NR_getms 386
+#define __NR_get_phy_addr 387
 
 typedef struct thread_data_package{
     int id;
@@ -41,65 +41,65 @@ long getms_syscall(int pid)
         return syscall(__NR_getms, pid);
 }
 
-long get_phy_addr_syscall(int pid, unsigned long* vaddr, unsigned long* paddr, unsigned int addr_num)
+long get_phy_addr_syscall(int pid, unsigned int* vaddr, unsigned int* paddr, unsigned int addr_num)
 {
         return syscall(__NR_get_phy_addr, pid, vaddr, paddr, addr_num);
 }
 
 
-void print_memory_address(unsigned long vaddr[20], unsigned long paddr[20]){
+void print_memory_address(unsigned int vaddr[20], unsigned int paddr[20]){
 
     int i = 0;
     (void)printf("High address                                                 \n");
     (void)printf("--------------------------(args and env)---------------------\n");
-    (void)printf("environ[0] at        : 0x%012lx ----> physical address = 0x%012lx\n", 
+    (void)printf("environ[0] at        : 0x%08x ----> physical address = 0x%08x\n", 
                  vaddr[i], paddr[i]);
     i++;
     (void)printf("-----------------------------Stack---------------------------\n");
-    (void)printf("main_var             : 0x%012lx ----> physical address = 0x%012lx\n", 
+    (void)printf("main_var             : 0x%08x ----> physical address = 0x%08x\n", 
                 vaddr[i], paddr[i]);
     i++;
-    (void)printf("main_array           : 0x%012lx ----> physical address = 0x%012lx\n", 
+    (void)printf("main_array           : 0x%08x ----> physical address = 0x%08x\n", 
                 vaddr[i], paddr[i]);
     i++;
-    (void)printf("main_var_with_init   : 0x%012lx ----> physical address = 0x%012lx\n", 
+    (void)printf("main_var_with_init   : 0x%08x ----> physical address = 0x%08x\n", 
                vaddr[i], paddr[i]);
     i++;
 
     (void)printf("-----------------------------Lib-----------------------------\n");
-    (void)printf("printf library func  : 0x%012lx ----> physical address = 0x%012lx\n", 
+    (void)printf("printf library func  : 0x%08x ----> physical address = 0x%08x\n", 
                 vaddr[i], paddr[i]);
     i++;
-    (void)printf("malloc library func  : 0x%012lx ----> physical address = 0x%012lx\n", 
+    (void)printf("malloc library func  : 0x%08x ----> physical address = 0x%08x\n", 
                 vaddr[i], paddr[i]);
     i++;
 
     (void)printf("-----------------------------HEAP----------------------------\n");
-    (void)printf("main_malloc_end      : 0x%012lx ----> physical address = 0x%012lx\n", 
+    (void)printf("main_malloc_end      : 0x%08x ----> physical address = 0x%08x\n", 
                 vaddr[i], paddr[i]);
     i++;
-    (void)printf("main_malloc_start    : 0x%012lx ----> physical address = 0x%012lx\n", 
+    (void)printf("main_malloc_start    : 0x%08x ----> physical address = 0x%08x\n", 
                 vaddr[i], paddr[i]);
     i++;
 
     (void)printf("-----------------------------BSS-----------------------------\n");
-    (void)printf("global_array         : 0x%012lx ----> physical address = 0x%012lx\n", 
+    (void)printf("global_array         : 0x%08x ----> physical address = 0x%08x\n", 
                 vaddr[i], paddr[i]);
     i++;
-    (void)printf("global_var           : 0x%012lx ----> physical address = 0x%012lx\n", 
+    (void)printf("global_var           : 0x%08x ----> physical address = 0x%08x\n", 
                 vaddr[i], paddr[i]);
     i++;
 
     (void)printf("-----------------------------Data----------------------------\n");
-    (void)printf("global_var_with_init : 0x%012lx ----> physical address = 0x%012lx\n", 
+    (void)printf("global_var_with_init : 0x%08x ----> physical address = 0x%08x\n", 
                vaddr[i], paddr[i]);
     i++;
 
     (void)printf("-----------------------------Text----------------------------\n");
-    (void)printf("user_func            : 0x%012lx ----> physical address = 0x%012lx\n", 
+    (void)printf("user_func            : 0x%08x ----> physical address = 0x%08x\n", 
                 vaddr[i], paddr[i]);
     i++;
-    (void)printf("main_func            : 0x%012lx ----> physical address = 0x%012lx\n", 
+    (void)printf("main_func            : 0x%08x ----> physical address = 0x%08x\n", 
                 vaddr[i], paddr[i]);
     i++;
 
@@ -137,22 +137,22 @@ int main(int argc, char* argv[]){
         (void)printf("main_var           = %d\n",(int)main_var);
         (void)printf("main_var_with_init = %d\n",(int)main_var_with_init);
         
-        unsigned long user_vaddr[20]={0};
-        unsigned long user_paddr[20]={0};
+        unsigned int user_vaddr[20]={0};
+        unsigned int user_paddr[20]={0};
         unsigned int addr_num = 0;
-        user_vaddr[addr_num++] = (unsigned long)environ;
-        user_vaddr[addr_num++] = (unsigned long)&main_var;
-        user_vaddr[addr_num++] = (unsigned long)main_array;
-        user_vaddr[addr_num++] = (unsigned long)&main_var_with_init;
-        user_vaddr[addr_num++] = (unsigned long)&printf;
-        user_vaddr[addr_num++] = (unsigned long)&malloc;
-        user_vaddr[addr_num++] = (unsigned long)main_ptr+MALLOC_SIZE;
-        user_vaddr[addr_num++] = (unsigned long)main_ptr;
-        user_vaddr[addr_num++] = (unsigned long)global_array;
-        user_vaddr[addr_num++] = (unsigned long)&global_var;
-        user_vaddr[addr_num++] = (unsigned long)&global_var_with_init;
-        user_vaddr[addr_num++] = (unsigned long)&print_memory_address;
-        user_vaddr[addr_num++] = (unsigned long)&main;
+        user_vaddr[addr_num++] = (unsigned int)environ;
+        user_vaddr[addr_num++] = (unsigned int)&main_var;
+        user_vaddr[addr_num++] = (unsigned int)main_array;
+        user_vaddr[addr_num++] = (unsigned int)&main_var_with_init;
+        user_vaddr[addr_num++] = (unsigned int)&printf;
+        user_vaddr[addr_num++] = (unsigned int)&malloc;
+        user_vaddr[addr_num++] = (unsigned int)main_ptr+MALLOC_SIZE;
+        user_vaddr[addr_num++] = (unsigned int)main_ptr;
+        user_vaddr[addr_num++] = (unsigned int)global_array;
+        user_vaddr[addr_num++] = (unsigned int)&global_var;
+        user_vaddr[addr_num++] = (unsigned int)&global_var_with_init;
+        user_vaddr[addr_num++] = (unsigned int)&print_memory_address;
+        user_vaddr[addr_num++] = (unsigned int)&main;
         
         get_phy_addr_syscall(pid, user_vaddr, user_paddr, addr_num);
         
@@ -186,22 +186,22 @@ int main(int argc, char* argv[]){
         (void)printf("main_var           = %d\n",(int)main_var);
         (void)printf("main_var_with_init = %d\n",(int)main_var_with_init);
 
-        unsigned long user_vaddr[20]={0};
-        unsigned long user_paddr[20]={0};
+        unsigned int user_vaddr[20]={0};
+        unsigned int user_paddr[20]={0};
         unsigned int addr_num = 0;
-        user_vaddr[addr_num++] = (unsigned long)environ;
-        user_vaddr[addr_num++] = (unsigned long)&main_var;
-        user_vaddr[addr_num++] = (unsigned long)main_array;
-        user_vaddr[addr_num++] = (unsigned long)&main_var_with_init;
-        user_vaddr[addr_num++] = (unsigned long)&printf;
-        user_vaddr[addr_num++] = (unsigned long)&malloc;
-        user_vaddr[addr_num++] = (unsigned long)main_ptr+MALLOC_SIZE;
-        user_vaddr[addr_num++] = (unsigned long)main_ptr;
-        user_vaddr[addr_num++] = (unsigned long)global_array;
-        user_vaddr[addr_num++] = (unsigned long)&global_var;
-        user_vaddr[addr_num++] = (unsigned long)&global_var_with_init;
-        user_vaddr[addr_num++] = (unsigned long)&print_memory_address;
-        user_vaddr[addr_num++] = (unsigned long)&main;
+        user_vaddr[addr_num++] = (unsigned int)environ;
+        user_vaddr[addr_num++] = (unsigned int)&main_var;
+        user_vaddr[addr_num++] = (unsigned int)main_array;
+        user_vaddr[addr_num++] = (unsigned int)&main_var_with_init;
+        user_vaddr[addr_num++] = (unsigned int)&printf;
+        user_vaddr[addr_num++] = (unsigned int)&malloc;
+        user_vaddr[addr_num++] = (unsigned int)main_ptr+MALLOC_SIZE;
+        user_vaddr[addr_num++] = (unsigned int)main_ptr;
+        user_vaddr[addr_num++] = (unsigned int)global_array;
+        user_vaddr[addr_num++] = (unsigned int)&global_var;
+        user_vaddr[addr_num++] = (unsigned int)&global_var_with_init;
+        user_vaddr[addr_num++] = (unsigned int)&print_memory_address;
+        user_vaddr[addr_num++] = (unsigned int)&main;
 
         get_phy_addr_syscall(pid, user_vaddr, user_paddr, addr_num);
 
